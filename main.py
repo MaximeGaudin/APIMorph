@@ -1,6 +1,6 @@
 #! /usr/bin/env python 
 
-from bottle import route, run, template, post, HTTPResponse, request, get
+from bottle import route, run, template, post, HTTPResponse, request, get, default_app
 from pymongo import MongoClient
 from bson.json_util import dumps
 
@@ -31,7 +31,7 @@ def post_handler(resource):
         "Content-Type": "application/json; charset=utf8",
         "Location": "/users/{0}".format(resource_id)
         }, 
-      body=resource)
+      body=dumps(request.json))
 
 
 @get('/<resource>')
@@ -48,4 +48,8 @@ def list_handler(resource, id):
   content = db[resource].find_one(id)
   return HTTPResponse(status=200, body=content_to_response(content))
 
-run(host='localhost', port=8091, reloader=True, debug=True)
+
+if __name__ == '__main__':
+  run(host='localhost', port=8091, reloader=True, debug=True)
+
+application = default_app()
