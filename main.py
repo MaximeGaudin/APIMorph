@@ -4,6 +4,7 @@ from bottle import route, run, template, post, HTTPResponse, request, get, defau
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.json_util import dumps
+import pdb
 
 DEFAULT_PAGE_SIZE=20
 
@@ -70,7 +71,19 @@ def list_handler(resource):
     sort_order = 'ASC' if len(s) == 1 else s[1]
     sorts.append((sort_field, {'ASC': 1, 'DESC': -1}[sort_order]))
 
-  content = db[resource].find().sort(sorts)
+  exacts = {}
+  for key, value in request.query.items():
+    keys = key.split('__')
+    key_type = keys[1]
+    if key_type == "exact":
+      exact_field = keys[0]
+      exact_value = value
+      exacts[exact_field] = exact_value
+
+  if not sorts:
+    content = db[resource].find(exacts)
+  else:
+    content = db[resource].find(exacts).sort(sorts)
 
   page = int(request.query.get('page', 1))
   page_size = int(request.query.get('size', DEFAULT_PAGE_SIZE))
@@ -100,7 +113,6 @@ def delete_handler(resource, id):
     return HTTPResponse(status=204)
   except:
     return HTTPResponse(status=404)
-
 
 @delete('/<resource>')
 def delete_endpoint_handler(resource):
