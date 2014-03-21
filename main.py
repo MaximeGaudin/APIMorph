@@ -5,6 +5,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.json_util import dumps
 
+import re
+
 DEFAULT_PAGE_SIZE=20
 
 client = MongoClient() 
@@ -13,6 +15,9 @@ db = client.apimorph
 def build_uri(scheme, hostname, path):
   return "{0}://{1}{2}".format(scheme, hostname, path)
 
+def parse_URI(URI):
+  split = URI.split('/');
+  return (split[-2], split[-1])
 
 def resource_to_response(resource, denormalized, collection_name, hostname):
   resource_id = str(resource['_id'])
@@ -26,8 +31,14 @@ def resource_to_response(resource, denormalized, collection_name, hostname):
     del resource['_links']
 
   for l in links:
-    if 'http' not in l['href']:
-      l['href'] = 'http://{0}'.format(hostname) + l['href']
+    if l['rel'] in denormalized:
+      resource_name, uuid = parse_URI(l['href'])
+      unwrapped = resource_to_response(db[resource_name].find_one({'_id': ObjectId(uuid)}), [], resource_name, hostname)
+      resource[l['rel']] = unwrapped
+      links.remove(l)
+    else:
+      if 'http' not in l['href']:
+        l['href'] = 'http://{0}'.format(hostname) + l['href']
 
   output = { "_links": links }
   output = dict(output.items() + resource.items())
@@ -83,7 +94,7 @@ def list_handler(resource):
   else:
     content = db[resource].find().sort(sorts)
 
-  denormalized = request.query.getall('denormalized')
+  denormalized = request.query.getall('unwrap')
   page = int(request.query.get('page', 1))
   page_size = int(request.query.get('size', DEFAULT_PAGE_SIZE))
   hostname = request.get_header('host')
@@ -96,7 +107,7 @@ def list_handler(resource):
 @get('/<resource>/<id>')
 def get_handler(resource, id):
   headers = { "Content-Type": "application/json; charset=utf8" }
-  denormalized = []
+  denormalized = request.query.getall('unwrap')
 
   try:
     content = db[resource].find_one({'_id': ObjectId(id)})
