@@ -70,11 +70,14 @@ def list_handler(resource):
 
 @get('/<resource>/<id>')
 def get_handler(resource, id):
-  content = db[resource].find_one({'_id': ObjectId(id)})
-  hostname = request.get_header('host')
   headers = { "Content-Type": "application/json; charset=utf8" }
 
-  return HTTPResponse(status=200, headers=headers, body=dumps(resource_to_response(content, resource, hostname)))
+  try:
+    content = db[resource].find_one({'_id': ObjectId(id)})
+    hostname = request.get_header('host')
+    return HTTPResponse(status=200, headers=headers, body=dumps(resource_to_response(content, resource, hostname)))
+  except:
+    return HTTPResponse(status=404, headers=headers)
 
 
 @delete('/<resource>/<id>')
