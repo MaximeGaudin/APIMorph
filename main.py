@@ -11,6 +11,7 @@ db = client.apimorph
 def build_uri(scheme, hostname, path):
   return "{0}://{1}{2}".format(scheme, hostname, path)
 
+
 def resource_to_response(resource, collection_name, hostname):
   resource_id = str(resource['_id'])
   del resource['_id']
@@ -23,6 +24,7 @@ def resource_to_response(resource, collection_name, hostname):
 
   output = dict(output.items() + resource.items())
   return output
+
 
 def content_to_response(content, collection_name, page, page_size, hostname):
   a = [resource_to_response(record, collection_name, hostname) for record in content]
@@ -97,6 +99,7 @@ def delete_handler(resource, id):
     return HTTPResponse(status=204)
   except:
     return HTTPResponse(status=404)
+
 
 @delete('/<resource>')
 def delete_endpoint_handler(resource):
