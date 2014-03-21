@@ -26,21 +26,26 @@ def content_to_response(content):
 @post('/<resource>')
 def post_handler(resource):
   resource_id = db[resource].insert(request.json)
+  body=dumps(request.json)
+
   return HTTPResponse(status=201, 
       headers={
         "Content-Type": "application/json; charset=utf8",
+        "Content-Length": len(body),
         "Location": "/users/{0}".format(resource_id)
-        }, 
-      body=dumps(request.json))
+        }, body=body)
 
 
 @get('/<resource>')
 def list_handler(resource):
   content = db[resource].find()
-  return HTTPResponse(status=200, 
+  results =content_to_response(content)
+
+  return HTTPResponse(status=200, body=results,
       headers={
-        "Content-Type": "application/json; charset=utf8"
-        }, body=content_to_response(content))
+        "Content-Type": "application/json; charset=utf8",
+        "Content-Length": len(results)
+        })
 
 
 @get('/<resource>/<id>')
