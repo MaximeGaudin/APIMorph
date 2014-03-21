@@ -5,6 +5,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.json_util import dumps
 
+DEFAULT_PAGE_SIZE=20
+
 client = MongoClient() 
 db = client.apimorph
 
@@ -61,18 +63,17 @@ def post_handler(resource):
 @get('/<resource>')
 def list_handler(resource):
 
-  if 'sort' in request.query:
-    sort = request.query['sort'].split(',')
-    sort_field = sort[0]
-    sort_order = 'ASC' if len(sort) == 1 else sort[1]
+  sorts = []
+  for sort in request.query.getall('sort'):
+    s = sort.split(',')
+    sort_field = s[0]
+    sort_order = 'ASC' if len(s) == 1 else s[1]
+    sorts.append((sort_field, {'ASC': 1, 'DESC': -1}[sort_order]))
 
-    content = db[resource].find().sort([(sort_field, {'ASC': 1, 'DESC': -1}[sort_order])])
-  else:
-    content = db[resource].find()
-
+  content = db[resource].find().sort(sorts)
 
   page = int(request.query.get('page', 1))
-  page_size = int(request.query.get('size', 20))
+  page_size = int(request.query.get('size', DEFAULT_PAGE_SIZE))
   hostname = request.get_header('host')
   results = content_to_response(content, resource, page, page_size, hostname)
   headers = { "Content-Type": "application/json; charset=utf8" }
