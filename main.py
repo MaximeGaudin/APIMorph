@@ -14,22 +14,28 @@ def build_uri(scheme, hostname, path):
   return "{0}://{1}{2}".format(scheme, hostname, path)
 
 
-def resource_to_response(resource, collection_name, hostname):
+def resource_to_response(resource, denormalized, collection_name, hostname):
   resource_id = str(resource['_id'])
   del resource['_id']
 
-  output = {
-      "links": [
-        { "rel": "self", "href": build_uri("http", hostname, "/{0}/{1}".format(collection_name, resource_id)) }
-        ],
-      }
+  links = []
+  links.append({ "rel": "self", "href": build_uri("http", hostname, "/{0}/{1}".format(collection_name, resource_id)) })
 
+  if '_links' in resource:
+    links.extend(resource['_links'])
+    del resource['_links']
+
+  for l in links:
+    if 'http' not in l['href']:
+      l['href'] = 'http://{0}'.format(hostname) + l['href']
+
+  output = { "_links": links }
   output = dict(output.items() + resource.items())
   return output
 
 
-def content_to_response(content, collection_name, page, page_size, hostname):
-  a = [resource_to_response(record, collection_name, hostname) for record in content]
+def content_to_response(content, collection_name, denormalized, page, page_size, hostname):
+  a = [resource_to_response(record, denormalized, collection_name, hostname) for record in content]
 
   links = []
   if(page > 1):
@@ -51,7 +57,9 @@ def content_to_response(content, collection_name, page, page_size, hostname):
 @post('/<resource>')
 def post_handler(resource):
   resource_id = db[resource].insert(request.json)
-  body=dumps(request.json)
+  hostname = request.get_header('host')
+  body=resource_to_response(request.json, [], resource, hostname)
+
   headers={
       "Content-Type": "application/json; charset=utf8",
       "Location": "/users/{0}".format(resource_id)
@@ -62,20 +70,24 @@ def post_handler(resource):
 
 @get('/<resource>')
 def list_handler(resource):
-
   sorts = []
   for sort in request.query.getall('sort'):
     s = sort.split(',')
     sort_field = s[0]
-    sort_order = 'ASC' if len(s) == 1 else s[1]
+    sort_order = 'ASC'
+    if len(s) > 1: sort_order = s[1]
     sorts.append((sort_field, {'ASC': 1, 'DESC': -1}[sort_order]))
 
-  content = db[resource].find().sort(sorts)
+  if len(sorts) == 0:
+    content = db[resource].find()
+  else:
+    content = db[resource].find().sort(sorts)
 
+  denormalized = request.query.getall('denormalized')
   page = int(request.query.get('page', 1))
   page_size = int(request.query.get('size', DEFAULT_PAGE_SIZE))
   hostname = request.get_header('host')
-  results = content_to_response(content, resource, page, page_size, hostname)
+  results = content_to_response(content, resource, denormalized, page, page_size, hostname)
   headers = { "Content-Type": "application/json; charset=utf8" }
 
   return HTTPResponse(status=200, body=dumps(results), headers=headers)
@@ -84,12 +96,14 @@ def list_handler(resource):
 @get('/<resource>/<id>')
 def get_handler(resource, id):
   headers = { "Content-Type": "application/json; charset=utf8" }
+  denormalized = []
 
   try:
     content = db[resource].find_one({'_id': ObjectId(id)})
     hostname = request.get_header('host')
-    return HTTPResponse(status=200, headers=headers, body=dumps(resource_to_response(content, resource, hostname)))
-  except:
+    return HTTPResponse(status=200, headers=headers, body=dumps(resource_to_response(content, denormalized, resource, hostname)))
+  except Exception as e:
+    print e
     return HTTPResponse(status=404, headers=headers)
 
 
