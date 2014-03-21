@@ -75,6 +75,18 @@ def test_sort_desc():
     assert v['value'] <= prec
     prec = v['value']
 
+def test_update():
+  r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
+  assert r.status_int == 201
+  location = r.headers['Location']
+  assert location != None
+
+  r = app.put_json(location, {'username': 'mgaudin', 'password': 'timeoff'})
+
+  json = app.get(location).json
+  assert json['username'] == 'mgaudin'
+
+
 # def test_get_exact():
 #   r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
   

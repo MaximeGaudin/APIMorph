@@ -1,4 +1,4 @@
-from bottle import post, HTTPResponse, request, get, default_app, delete
+from bottle import post, HTTPResponse, request, get, default_app, delete, put
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
@@ -7,10 +7,25 @@ from consts import DEFAULT_PAGE_SIZE
 from db import mongo
 from db import MongoResource, ResourceList
 
+@put('/<endpoint>/<id>')
+def update_resource(endpoint, id):
+  new_document = request.json
+  new_document.update({ '_id': ObjectId(id) })
+
+  mongo[endpoint].save(new_document)
+  resource = MongoResource(endpoint, id)
+
+  headers={
+      "Content-Type": "application/json; charset=utf8",
+      "Location": "/users/{0}".format(id)
+      }
+
+  return HTTPResponse(status=201, headers=headers, body=dumps(resource.to_response()))
+
+
 @post('/<endpoint>')
 def create_resource(endpoint):
   resource_id = mongo[endpoint].insert(request.json)
-  hostname = request.get_header('host')
   resource = MongoResource(endpoint, resource_id)
 
   headers={
