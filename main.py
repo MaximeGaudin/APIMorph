@@ -4,6 +4,7 @@ from bottle import route, run, template, post, HTTPResponse, request, get, defau
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.json_util import dumps
+import pdb
 
 import re
 
@@ -33,9 +34,15 @@ def resource_to_response(resource, denormalized, collection_name, hostname):
   for l in links:
     if l['rel'] in denormalized:
       resource_name, uuid = parse_URI(l['href'])
-      unwrapped = resource_to_response(db[resource_name].find_one({'_id': ObjectId(uuid)}), [], resource_name, hostname)
-      resource[l['rel']] = unwrapped
-      links.remove(l)
+      try:
+        reference = db[resource_name].find_one({'_id': ObjectId(uuid)})
+
+        if reference is not None:
+          unwrapped = resource_to_response(reference, [], resource_name, hostname)
+          resource[l['rel']] = unwrapped
+          links.remove(l)
+      except: pass
+
     else:
       if 'http' not in l['href']:
         l['href'] = 'http://{0}'.format(hostname) + l['href']
@@ -89,10 +96,21 @@ def list_handler(resource):
     if len(s) > 1: sort_order = s[1]
     sorts.append((sort_field, {'ASC': 1, 'DESC': -1}[sort_order]))
 
+  exacts = {}
+  for key, value in request.query.items():
+    try:
+      keys = key.split('__')
+      key_type = keys[1]
+      if key_type == "exact":
+        exact_field = keys[0]
+        exact_value = value
+        exacts[exact_field] = exact_value
+    except IndexError: pass
+
   if len(sorts) == 0:
-    content = db[resource].find()
+    content = db[resource].find(exacts)
   else:
-    content = db[resource].find().sort(sorts)
+    content = db[resource].find(exacts).sort(sorts)
 
   denormalized = request.query.getall('unwrap')
   page = int(request.query.get('page', 1))
@@ -125,7 +143,6 @@ def delete_handler(resource, id):
     return HTTPResponse(status=204)
   except:
     return HTTPResponse(status=404)
-
 
 @delete('/<resource>')
 def delete_endpoint_handler(resource):

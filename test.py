@@ -6,24 +6,24 @@ app = TestApp(application)
 
 def test_endpoint_creation():
   r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
-  assert r.status_code == 201
+  assert r.status_int == 201
   assert r.headers['Location'] != None
 
   r = app.get(r.headers['Location'])
-  assert r.status_code == 200
+  assert r.status_int == 200
 
 
 def test_delete_resource():
   r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
   location = r.headers['Location']
 
-  assert r.status_code == 201
+  assert r.status_int == 201
   assert location != None
 
   r = app.get(location)
 
   r = app.delete(location)
-  assert r.status_code == 204
+  assert r.status_int == 204
 
   r = app.get(location, status=404)
 
@@ -74,3 +74,15 @@ def test_sort_desc():
   for v in desc['content']:
     assert v['value'] <= prec
     prec = v['value']
+
+# def test_get_exact():
+#   r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
+  
+#   r = app.get('/users?username__exact=ronyd', status=200)
+#   for elem in r.body['content']:
+#     assert elem['username'] == "ronyd"
+
+#   r = app.get('/users?username__exact=ronyd&password__exact=timeoff', status=200)
+#   for elem in r.body['content']:
+#     assert elem['username'] == "ronyd"
+#     assert elem['password'] == "timeoff"
