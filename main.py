@@ -58,7 +58,17 @@ def post_handler(resource):
 
 @get('/<resource>')
 def list_handler(resource):
-  content = db[resource].find()
+
+  if 'sort' in request.query:
+    sort = request.query['sort'].split(',')
+    sort_field = sort[0]
+    sort_order = 'ASC' if len(sort) == 1 else sort[1]
+
+    content = db[resource].find().sort([(sort_field, {'ASC': 1, 'DESC': -1}[sort_order])])
+  else:
+    content = db[resource].find()
+
+
   page = int(request.query.get('page', 1))
   page_size = int(request.query.get('size', 20))
   hostname = request.get_header('host')
@@ -88,6 +98,9 @@ def delete_handler(resource, id):
   except:
     return HTTPResponse(status=404)
 
+@delete('/<resource>')
+def delete_endpoint_handler(resource):
+  db[resource].drop()
 
 if __name__ == '__main__':
   run(host='localhost', port=8091, reloader=True, debug=True)
