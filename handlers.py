@@ -1,4 +1,4 @@
-from bottle import post, HTTPResponse, request, get, default_app, delete, put
+from bottle import post, HTTPResponse, request, get, default_app, delete, put, route
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
@@ -6,6 +6,24 @@ from consts import DEFAULT_PAGE_SIZE
 
 from db import mongo
 from db import MongoResource, ResourceList
+
+@route('/<endpoint>/<id>', 'PATCH')
+def partial_update_resource(endpoint, id):
+  resource = MongoResource(endpoint, id)
+  new_document = resource.document
+  new_document.update(request.json)
+  new_document.update({ '_id': ObjectId(id) })
+
+  mongo[endpoint].save(new_document)
+  resource = MongoResource(endpoint, id)
+
+  headers={
+      "Content-Type": "application/json; charset=utf8",
+      "Location": "/users/{0}".format(id)
+      }
+
+  return HTTPResponse(status=201, headers=headers, body=dumps(resource.to_response()))
+
 
 @put('/<endpoint>/<id>')
 def update_resource(endpoint, id):
