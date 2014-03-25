@@ -1,49 +1,54 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>APIMorph by MaximeGaudin</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="APIMorph : A Polymorphic API for rapid front-end prototyping and API mocking" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>APIMorph</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>APIMorph</h1>
-        <p>A Polymorphic API for rapid front-end prototyping or API mocking</p>
 
-        <p class="view"><a href="https://github.com/MaximeGaudin/APIMorph">View the Project on GitHub <small>MaximeGaudin/APIMorph</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/MaximeGaudin/APIMorph">View on GitHub</a>
 
+          <h1 id="project_title">APIMorph</h1>
+          <h2 id="project_tagline">A Polymorphic API for rapid front-end prototyping and API mocking</h2>
 
-        <ul>
-          <li><a href="https://github.com/MaximeGaudin/APIMorph/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/MaximeGaudin/APIMorph/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/MaximeGaudin/APIMorph">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a name="why-" class="anchor" href="#why-"><span class="octicon octicon-link"></span></a>Why ?</h1>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/MaximeGaudin/APIMorph/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/MaximeGaudin/APIMorph/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
 
-<p>Lately, AngularJS became a major brick of my projects stack and I love the fact that I can use quick-and-dirty JSON to create my model. However, once the first prototype was done, I had to implement an API that usually was only a CRUD API with some findBy features.</p>
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p>Now that front-end development has never been so fast, I wondered : Why is my API not able to follow the pace of my AngularJS client?!</p>
 
-<p>Tired of that situation, I took advantage of a private hackathon organized by some folks at <a href="http://www.lateral-thoughts.com/">Lateal Throughts</a> to start the project.</p>
-
-<p>This is our (<a href="https://github.com/obigroup" class="user-mention">@obigroup</a> and <a href="https://github.com/MaximeGaudin" class="user-mention">@MaximeGaudin</a>) output...</p>
+<p>Tired of that situation, I took advantage of a private hackathon organized by some folks at <a href="http://www.lateral-thoughts.com/">Lateal Throughts</a> to start the project and Rony (<a href="https://github.com/obigroup" class="user-mention">@obigroup</a>) and I developped a little API able to accept any request you can make and answer RESTfully like you hope it would !</p>
 
 <h1>
-<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h1>
+<a name="a-full-featured-crud-api" class="anchor" href="#a-full-featured-crud-api"><span class="octicon octicon-link"></span></a>A Full Featured CRUD API</h1>
 
-<h2>
-<a name="a-full-featured-crud-api" class="anchor" href="#a-full-featured-crud-api"><span class="octicon octicon-link"></span></a>A Full Featured CRUD API</h2>
+<p>One is able to use a full feature (GET, POST, PUT, DELETE, PATCH) REST (and HATEOAS) API.</p>
 
-<p>Our first feature was to implement a full feature (GET, POST, PUT, DELETE, PATCH) REST (and HATEOAS) API.</p>
+<p>For instance</p>
+
+<pre><code>curl -XPOST -d '{ "username": "MaximeGaudin" }' http://localhost:8091/users
+</code></pre>
+
+<p>creates a new endpoint <code>/users</code> :</p>
+
+<pre><code>curl http://localhost:8091/users
+</code></pre>
 
 <h2>
 <a name="pagination" class="anchor" href="#pagination"><span class="octicon octicon-link"></span></a>Pagination</h2>
@@ -68,12 +73,17 @@
 
 <p>TODO</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/MaximeGaudin">MaximeGaudin</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">APIMorph maintained by <a href="https://github.com/MaximeGaudin">MaximeGaudin</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
     
+
   </body>
 </html>
