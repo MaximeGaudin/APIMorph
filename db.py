@@ -1,7 +1,17 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, Connection
 from bson.objectid import ObjectId
 from utils import build_uri, parse_URI
+
 import copy
+import os
+
+MONGO_URL = os.environ.get('MONGOHQ_URL')
+if MONGO_URL:
+  conn = Connection(MONGO_URL)
+  mongo = conn[urlparse(MONGO_URL).path[1:]]
+else:
+  conn = Connection('localhost', 27017)
+  mongo = conn['someapps-db']
 
 client = MongoClient() 
 mongo = client.apimorph
