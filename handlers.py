@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from consts import * 
 from utils import build_uri
 
+from pymongo.errors import DuplicateKeyError
 from db import mongo
 from db import MongoResource, ResourceList
 
@@ -67,7 +68,10 @@ def update_resource(endpoint, id):
 @post('/<endpoint>')
 def create_resource(endpoint):
   endpoint_metadata = { '_id': endpoint, 'rel': endpoint, 'href': build_uri('/' + endpoint) }
-  mongo[META_COLLECTION].insert(endpoint_metadata)
+  
+  try:
+    mongo[META_COLLECTION].insert(endpoint_metadata)
+  except DuplicateKeyError: pass
 
   resource_id = mongo[endpoint].insert(request.json)
   resource = MongoResource(endpoint, resource_id)
