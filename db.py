@@ -1,6 +1,7 @@
 from pymongo import MongoClient, Connection
 from bson.objectid import ObjectId
 from utils import build_uri, parse_URI
+from urlparse import urlparse
 
 import copy
 import os
