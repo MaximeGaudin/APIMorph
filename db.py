@@ -12,10 +12,7 @@ if MONGO_URL:
   mongo = conn[urlparse(MONGO_URL).path[1:]]
 else:
   conn = Connection('localhost', 27017)
-  mongo = conn['someapps-db']
-
-client = MongoClient() 
-mongo = client.apimorph
+  mongo = conn['apimorph']
 
 class ResourceList:
   def __init__(self, collection, filters={}, sort=[]):
