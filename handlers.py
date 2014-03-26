@@ -18,6 +18,18 @@ def list_resources():
 
   return output
 
+
+@delete('/')
+def reset_api():
+  if mongo[META_COLLECTION]:
+    available_endpoints = mongo[META_COLLECTION].find()
+
+    for endpoint in available_endpoints:
+      mongo[endpoint['_id']].drop()
+
+    mongo[META_COLLECTION].drop()
+
+
 @route('/<endpoint>/<id>', 'PATCH')
 def partial_update_resource(endpoint, id):
   resource = MongoResource(endpoint, id)
