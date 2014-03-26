@@ -5,13 +5,14 @@ from urlparse import urlparse
 
 import copy
 import os
+import mongomock
 
 MONGO_URL = os.environ.get('MONGOHQ_URL')
 if MONGO_URL:
   conn = Connection(MONGO_URL)
   mongo = conn[urlparse(MONGO_URL).path[1:]]
 else:
-  conn = Connection('localhost', 27017)
+  conn = mongomock.Connection()
   mongo = conn['apimorph']
 
 class ResourceList:
