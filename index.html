@@ -31,7 +31,9 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <p>Now that front-end development has never been so fast, I wondered : Why is my API not able to follow the pace of my AngularJS client?!</p>
+        <p><img src="https://travis-ci.org/MaximeGaudin/APIMorph.svg" alt="Build status"></p>
+
+<p>Now that front-end development has never been so fast, I wondered : Why is my API not able to follow the pace of my AngularJS client?!</p>
 
 <p>Tired of that situation, I took advantage of a private hackathon organized by some folks at <a href="http://www.lateral-thoughts.com/">Lateal Throughts</a> to start the project and Rony (<a href="https://github.com/obigroup" class="user-mention">@obigroup</a>) and I developped a little API able to accept any request you can make and answer RESTfully like you hope it would !</p>
 
@@ -43,17 +45,97 @@
 <p>For instance</p>
 
 <pre><code>curl -XPOST -d '{ "username": "MaximeGaudin" }' http://localhost:8091/users
+
+{
+    "username": "MaximeGaudin",
+    "_links": [
+        {
+            "href": "http://apimorph.herokuapp.com/users/533328c09be9b200070211d5",
+            "rel": "self"
+        }
+    ]
+}
 </code></pre>
 
 <p>creates a new endpoint <code>/users</code> :</p>
 
 <pre><code>curl http://localhost:8091/users
+
+{
+  "content": [
+  {
+    "username": "MaximeGaudin",
+      "_links": [
+      {
+        "href": "http://apimorph.herokuapp.com/users/533328c09be9b200070211d5",
+        "rel": "self"
+      }
+    ]
+  }
+  ],
+    "meta": {
+      "size": 20,
+      "total": 1,
+      "page": 1
+    },
+    "links_": []
+}
+</code></pre>
+
+<p>To allow wild debugging, even inexistent endpoints returns something :</p>
+
+<pre><code>curl http://localhost:8091/inexistent
+
+{
+  "content": [ ],
+    "meta": {
+      "size": 20,
+      "total": 0,
+      "page": 1
+    },
+    "links_": []
+}
 </code></pre>
 
 <h2>
 <a name="pagination" class="anchor" href="#pagination"><span class="octicon octicon-link"></span></a>Pagination</h2>
 
-<p>TODO</p>
+<p>As you already noticed, every results are paginated. One can specify page and page size with the following GET parameters :</p>
+
+<ul>
+<li>
+<code>page</code> : Sets the page number (default: 1)</li>
+<li>
+<code>size</code> : Sets the page size (default: 20)</li>
+</ul><p>For instance :</p>
+
+<pre><code>curl http://localhost:8091/users?page=1&amp;size=1
+
+{
+  "content": [
+  {
+    "username": "MaximeGaudin",
+      "_links": [
+      {
+        "href": "http://apimorph.herokuapp.com/users/533328c09be9b200070211d5",
+        "rel": "self"
+      }
+    ]
+  }
+  ],
+    "meta": {
+      "size": 20,
+      "total": 1,
+      "page": 1
+    },
+    "links_": [
+        {
+            "href": "http://apimorph.herokuapp.com/users?page=2&amp;size=1",
+            "rel": "next"
+        }
+    ]
+}
+</code></pre>
 
 <h2>
 <a name="resource-linking-and-denormalization" class="anchor" href="#resource-linking-and-denormalization"><span class="octicon octicon-link"></span></a>Resource linking and Denormalization</h2>
