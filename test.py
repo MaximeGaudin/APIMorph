@@ -2,7 +2,28 @@ from main import application
 from webtest import TestApp
 from random import randint
 
+from utils import build_uri
+
+from db import mongo
+mongo['__meta'].drop()
+
 app = TestApp(application)
+
+def test_endpoint_list():
+  r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
+  assert r.status_int == 201
+
+  r = app.post_json('/comments', {'body': 'What a nice API !'})
+  assert r.status_int == 201
+
+  r = app.get('/')
+  print(r)
+
+  json = r.json
+  assert len(json['_links']) == 2
+  assert { 'rel': 'users', 'href': build_uri('/users') } in json['_links']
+  assert { 'rel': 'comments', 'href': build_uri('/comments') } in json['_links']
+
 
 def test_endpoint_creation():
   r = app.post_json('/users', {'username': 'ronyd', 'password': 'timeoff'})
@@ -98,6 +119,7 @@ def test_partial_update():
   assert json['username'] == 'mgaudin'
   assert 'password' in json
   assert json['password'] == 'timeoff'
+
 
 
 # def test_get_exact():

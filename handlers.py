@@ -2,10 +2,21 @@ from bottle import post, HTTPResponse, request, get, default_app, delete, put, r
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
-from consts import DEFAULT_PAGE_SIZE
+from consts import * 
+from utils import build_uri
 
 from db import mongo
 from db import MongoResource, ResourceList
+
+@get('/')
+def list_resources():
+  available_endpoints = mongo[META_COLLECTION].find()
+  
+  output = { '_links': [] }
+  for endpoint in available_endpoints:
+    output['_links'].append({ 'rel': endpoint['rel'], 'href': endpoint['href'] })
+
+  return output
 
 @route('/<endpoint>/<id>', 'PATCH')
 def partial_update_resource(endpoint, id):
@@ -43,6 +54,9 @@ def update_resource(endpoint, id):
 
 @post('/<endpoint>')
 def create_resource(endpoint):
+  endpoint_metadata = { '_id': endpoint, 'rel': endpoint, 'href': build_uri('/' + endpoint) }
+  mongo[META_COLLECTION].insert(endpoint_metadata)
+
   resource_id = mongo[endpoint].insert(request.json)
   resource = MongoResource(endpoint, resource_id)
 
